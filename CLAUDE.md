@@ -20,6 +20,15 @@ The device owner runs Arch Linux. Native builds need:
 
 If building fails with "Unsupported class file major version", check that `JAVA_HOME` points to JDK 17, not the system default.
 
+### APK builds
+
+```bash
+npx expo prebuild --platform android        # Generate android/ directory
+cd android && ./gradlew assembleDebug       # Debug APK
+cd android && ./gradlew assembleRelease     # Release APK (needs signing key)
+# Output: android/app/build/outputs/apk/debug/app-debug.apk
+```
+
 ## Architecture
 
 Local-first, single-user calorie tracking app. React Native (Expo SDK 55) + SQLite + AI-powered meal analysis. No backend — all data on-device.
@@ -32,9 +41,9 @@ Screens (app/) → Zustand Stores (store/) → DB Layer (db/) → SQLite
 ```
 
 - **Screens** never call `db/` directly for writes — always go through stores
-- **Stores** orchestrate DB operations + service calls, then update UI state
-- **`db/`** is a clean abstraction over SQLite — the only layer that touches the database. Designed so only this layer changes when migrating to PostgreSQL in Phase 2
-- **`services/ai.ts`** is the AI orchestrator: tries API call first (Tier 1), falls back to generating a copy-paste prompt (Tier 2)
+- **Stores** orchestrate DB operations + service calls, then update UI state. Each store owns one domain: meals, water, profile, streaks. Screens load data in `useFocusEffect`
+- **`db/`** is the only layer that touches SQLite — designed so only this layer changes when migrating to PostgreSQL in Phase 2
+- **`services/`** handles external concerns: AI analysis (`ai.ts` orchestrator), CSV export (`csvExport.ts`), TDEE goal calculation (`goalCalculator.ts`)
 
 ### AI two-tier system
 
@@ -53,15 +62,11 @@ The prompt template lives in `constants/config.ts` (`aiPromptTemplate`). Respons
 
 ### Routing
 
-Expo Router with file-based routing. Root layout (`app/_layout.tsx`) checks `profile.onboarding_done` to decide between onboarding flow and main tabs.
+Expo Router with file-based routing. `app/_layout.tsx` checks `profile.onboarding_done` to decide between onboarding flow and main tabs.
 
-- `app/(tabs)/` — 5 tabs: Home, Add, History, Stats, Settings
+- `app/(tabs)/` — 5 tabs: Home (`index`), Add (`add`), History (`history`), Stats (`stats`), Settings (`settings`)
 - `app/onboarding/` — Multi-step wizard (single screen with internal step state)
 - `app/meal/[id].tsx` — Modal screen for viewing/editing a meal
-
-### State management
-
-Zustand stores in `store/` — each store owns one domain (meals, water, profile, streaks). Stores call DB functions directly and refresh state after mutations. Screens load data in `useFocusEffect`.
 
 ### Dark theme
 
@@ -75,3 +80,4 @@ All colors centralized in `constants/colors.ts`. Dark background (#0F0F0F), gree
 - CSV export uses SAF (Storage Access Framework) on Android for "Save to Downloads", share sheet on iOS
 - API keys stored in `expo-secure-store`, not in app state or config files
 - `expo-file-system` uses the `/legacy` import path (e.g. `from 'expo-file-system/legacy'`)
+- `utils/uuid.ts` generates UUIDs without `crypto.getRandomValues` (not available in React Native) — uses `Math.random` based RFC 4122 v4
