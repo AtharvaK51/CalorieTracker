@@ -31,7 +31,7 @@ cd android && ./gradlew assembleRelease     # Release APK (needs signing key)
 
 ## Architecture
 
-Local-first, single-user calorie tracking app. React Native (Expo SDK 55) + SQLite + AI-powered meal analysis. No backend — all data on-device.
+Local-first, single-user calorie tracking app. React Native (Expo SDK 55) + SQLite + AI-powered meal analysis. No backend — all data on-device. UI components from **Gluestack UI** (headless/unstyled).
 
 ### Layered data flow
 
@@ -41,7 +41,7 @@ Screens (app/) → Zustand Stores (store/) → DB Layer (db/) → SQLite
 ```
 
 - **Screens** never call `db/` directly for writes — always go through stores
-- **Stores** orchestrate DB operations + service calls, then update UI state. Each store owns one domain: meals, water, profile, streaks. Screens load data in `useFocusEffect`
+- **Stores** orchestrate DB operations + service calls, then update UI state. Each store owns one domain: meals, water, profile, streaks. Screens reload data via `useFocusEffect` (not on mount) so navigating back to a tab always shows fresh data
 - **`db/`** is the only layer that touches SQLite — designed so only this layer changes when migrating to PostgreSQL in Phase 2
 - **`services/`** handles external concerns: AI analysis (`ai.ts` orchestrator), CSV export (`csvExport.ts`), TDEE goal calculation (`goalCalculator.ts`)
 
@@ -81,3 +81,4 @@ All colors centralized in `constants/colors.ts`. Dark background (#0F0F0F), gree
 - API keys stored in `expo-secure-store`, not in app state or config files
 - `expo-file-system` uses the `/legacy` import path (e.g. `from 'expo-file-system/legacy'`)
 - `utils/uuid.ts` generates UUIDs without `crypto.getRandomValues` (not available in React Native) — uses `Math.random` based RFC 4122 v4
+- `parsed_items` on a meal is a **JSON string** (not an object) — always `JSON.parse()` before use and `JSON.stringify()` before writing
