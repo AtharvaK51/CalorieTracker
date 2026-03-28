@@ -2,10 +2,6 @@
 
 A local-first calorie tracking app built with React Native (Expo) and SQLite. Log meals in natural language, get AI-powered nutritional breakdowns, and track your daily intake — all on-device, no backend required.
 
-<p align="center">
-  <img src="references/dark-preview.png" alt="App Preview" width="280" />
-</p>
-
 ## Features
 
 - **Natural language meal logging** — type "Poha + chai" and get a full nutritional breakdown
