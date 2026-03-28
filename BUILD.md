@@ -121,22 +121,34 @@ npx expo prebuild --platform android
 > npx expo prebuild --platform android --clean
 > ```
 
-### Step 4 — Build the APK
+### Step 4 — Enable JS bundling in debug builds
 
-#### Debug APK (for testing — no signing key needed)
+By default, the React Native Gradle plugin skips bundling the JS for debug builds (expecting Metro to serve it). To make a standalone APK that works without Metro, `android/app/build.gradle` must have this set inside the `react {}` block:
+
+```groovy
+debuggableVariants = []
+```
+
+This is already configured in this repo. If you regenerated `android/` with `--clean`, re-apply it manually.
+
+### Step 5 — Build the APK
+
+#### Debug APK (standalone — no Metro or USB required)
 
 ```bash
 cd android
-./gradlew assembleDebug
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew assembleDebug
 ```
 
 Output: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+> **Do not run `./gradlew clean` before building.** It deletes generated codegen artifacts for native modules (e.g. `react-native-gesture-handler`) which causes the next build to fail. If you need a truly fresh build, re-run `npx expo prebuild --platform android --clean` from the project root instead.
 
 #### Release APK (optimized — requires signing key)
 
 ```bash
 cd android
-./gradlew assembleRelease
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew assembleRelease
 ```
 
 Output: `android/app/build/outputs/apk/release/app-release-unsigned.apk`
@@ -154,7 +166,11 @@ Output: `android/app/build/outputs/apk/release/app-release-unsigned.apk`
 3. Connect phone via USB and run:
 
 ```bash
+# First install
 adb install android/app/build/outputs/apk/debug/app-debug.apk
+
+# Reinstall (update existing install)
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ### Via file transfer
@@ -226,15 +242,19 @@ Then `./gradlew assembleRelease` produces a signed APK directly.
 
 ## Troubleshooting
 
+### "Unable to load script" on device
+
+The JS bundle is not packaged in the APK. Ensure `android/app/build.gradle` has `debuggableVariants = []` inside the `react {}` block (see Step 4), then rebuild.
+
 ### "Unsupported class file major version"
 
-Gradle is using the wrong JDK. Fix:
+Gradle is using the wrong JDK. Pass `JAVA_HOME` explicitly:
 
 ```bash
-echo $JAVA_HOME   # Must point to JDK 17, not 21/26
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew assembleDebug
 ```
 
-Also check `android/gradle.properties` — it should contain:
+Also verify `android/gradle.properties` contains:
 
 ```
 org.gradle.java.home=/usr/lib/jvm/java-17-openjdk
@@ -248,6 +268,15 @@ org.gradle.java.home=/usr/lib/jvm/java-17-openjdk
 echo $ANDROID_HOME
 ls $ANDROID_HOME/platforms
 ```
+
+### Build fails after `./gradlew clean`
+
+`clean` deletes generated codegen artifacts for native modules, causing CMake errors like:
+```
+add_subdirectory given source "...react-native-gesture-handler.../jni/" which is not an existing directory
+```
+
+Do **not** use `./gradlew clean`. To reset native files, use `npx expo prebuild --platform android --clean` from the project root instead.
 
 ### `npx expo prebuild` fails
 

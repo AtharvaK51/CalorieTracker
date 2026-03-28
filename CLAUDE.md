@@ -24,10 +24,14 @@ If building fails with "Unsupported class file major version", check that `JAVA_
 
 ```bash
 npx expo prebuild --platform android        # Generate android/ directory
-cd android && ./gradlew assembleDebug       # Debug APK
-cd android && ./gradlew assembleRelease     # Release APK (needs signing key)
+cd android && JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew assembleDebug    # Debug APK
+cd android && JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew assembleRelease  # Release APK (needs signing key)
 # Output: android/app/build/outputs/apk/debug/app-debug.apk
 ```
+
+**Important:** `android/app/build.gradle` must have `debuggableVariants = []` inside the `react {}` block, otherwise the JS bundle is not packaged into the APK and the app shows "Unable to load script" on launch. This is already configured — re-apply it if `android/` is regenerated with `--clean`.
+
+**Never run `./gradlew clean`** — it deletes generated codegen artifacts for native modules causing CMake failures. To reset, use `npx expo prebuild --platform android --clean` from the project root instead.
 
 ## Architecture
 
