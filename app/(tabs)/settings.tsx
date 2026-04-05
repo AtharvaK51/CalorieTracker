@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 import { Colors } from '../../constants/colors';
 import { Config } from '../../constants/config';
 import { useProfileStore } from '../../store/useProfileStore';
@@ -114,6 +115,12 @@ export default function SettingsScreen() {
           />
           <TouchableOpacity style={styles.saveBtn} onPress={saveGoals}>
             <Text style={styles.saveBtnText}>Save Goals</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.recalcBtn}
+            onPress={() => router.push('/setup-goals')}
+          >
+            <Text style={styles.recalcBtnText}>Recalculate with Body Stats</Text>
           </TouchableOpacity>
         </View>
 
@@ -334,6 +341,20 @@ const styles = StyleSheet.create({
   saveBtnText: {
     color: Colors.background,
     fontSize: 15,
+    fontWeight: '600',
+  },
+  recalcBtn: {
+    backgroundColor: Colors.surfaceLight,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  recalcBtnText: {
+    color: Colors.primary,
+    fontSize: 14,
     fontWeight: '600',
   },
   actionBtn: {

@@ -29,6 +29,7 @@ Meal: "${meal}"
 
 Return this exact JSON structure:
 {
+  "title": "short readable meal name (e.g. '2 Idlis with Sambar')",
   "items": [
     {
       "name": "item name",

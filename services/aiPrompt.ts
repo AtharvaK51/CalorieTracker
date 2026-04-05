@@ -1,6 +1,7 @@
 import { Config } from '../constants/config';
 
 export interface NutritionResult {
+  title?: string;
   items: {
     name: string;
     quantity: string;
@@ -48,6 +49,7 @@ export function parseAiResponse(responseText: string): NutritionResult | null {
     }
 
     return {
+      title: typeof parsed.title === 'string' ? parsed.title.trim() : undefined,
       items: parsed.items ?? [],
       total: {
         calories: parsed.total.calories ?? 0,
