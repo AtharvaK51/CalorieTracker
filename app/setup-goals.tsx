@@ -38,7 +38,17 @@ const weightGoals = [
   { key: 'gain', label: 'Gain Muscle', desc: 'Calorie surplus (+300 kcal)', delta: 300 },
 ] as const;
 
+type GenderKey = typeof genders[number]['key'];
+type ActivityKey = typeof activityLevels[number]['key'];
 type WeightGoalKey = 'lose' | 'maintain' | 'gain';
+
+function normalizeGender(v: string | null | undefined): GenderKey {
+  return genders.some((g) => g.key === v) ? (v as GenderKey) : 'male';
+}
+
+function normalizeActivity(v: string | null | undefined): ActivityKey {
+  return activityLevels.some((a) => a.key === v) ? (v as ActivityKey) : 'moderate';
+}
 
 const STEP_TITLES: Record<Step, string> = {
   body: 'Body Stats',
@@ -61,10 +71,10 @@ export default function SetupGoalsScreen() {
   const [age, setAge] = useState(
     profile?.age ? String(profile.age) : ''
   );
-  const [gender, setGender] = useState<string>(profile?.gender ?? 'male');
+  const [gender, setGender] = useState<GenderKey>(normalizeGender(profile?.gender));
   const [weightGoal, setWeightGoal] = useState<WeightGoalKey>('maintain');
-  const [activity, setActivity] = useState<string>(
-    profile?.activity_level ?? 'moderate'
+  const [activity, setActivity] = useState<ActivityKey>(
+    normalizeActivity(profile?.activity_level)
   );
   const [goals, setGoals] = useState({
     calories: Math.round(profile?.calorie_goal ?? 2000),
@@ -90,7 +100,7 @@ export default function SetupGoalsScreen() {
       const h = parseFloat(height) || 170;
       const a = parseInt(age) || 25;
       const delta = weightGoals.find((wg) => wg.key === weightGoal)?.delta ?? 0;
-      const calculated = calculateGoals(w, h, a, gender as any, activity as any);
+      const calculated = calculateGoals(w, h, a, gender, activity);
       const adjustedCalories = Math.max(1200, calculated.calories + delta);
       const originalProtein = calculated.protein_g;
       const originalCarbs = calculated.carbs_g;
@@ -227,9 +237,9 @@ function BodyStep({
   weight, height, age, gender,
   onWeight, onHeight, onAge, onGender, onNext,
 }: {
-  weight: string; height: string; age: string; gender: string;
+  weight: string; height: string; age: string; gender: GenderKey;
   onWeight: (v: string) => void; onHeight: (v: string) => void;
-  onAge: (v: string) => void; onGender: (v: string) => void;
+  onAge: (v: string) => void; onGender: (v: GenderKey) => void;
   onNext: () => void;
 }) {
   return (
@@ -324,8 +334,8 @@ function WeightGoalStep({
 function ActivityStep({
   selected, onSelect, onNext,
 }: {
-  selected: string;
-  onSelect: (k: string) => void;
+  selected: ActivityKey;
+  onSelect: (k: ActivityKey) => void;
   onNext: () => void;
 }) {
   return (
