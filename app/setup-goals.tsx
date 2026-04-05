@@ -107,20 +107,27 @@ export default function SetupGoalsScreen() {
   };
 
   const save = async () => {
-    await updateProfile({
-      weight_kg: parseFloat(weight) || null,
-      height_cm: parseFloat(height) || null,
-      age: parseInt(age) || null,
-      gender,
-      activity_level: activity,
-      calorie_goal: goals.calories,
-      protein_goal_g: goals.protein_g,
-      carbs_goal_g: goals.carbs_g,
-      fat_goal_g: goals.fat_g,
-    });
-    Alert.alert('Saved', 'Your goals have been updated.', [
-      { text: 'OK', onPress: () => router.back() },
-    ]);
+    try {
+      await updateProfile({
+        weight_kg: parseFloat(weight) || null,
+        height_cm: parseFloat(height) || null,
+        age: parseInt(age) || null,
+        gender,
+        activity_level: activity,
+        calorie_goal: goals.calories,
+        protein_goal_g: goals.protein_g,
+        carbs_goal_g: goals.carbs_g,
+        fat_goal_g: goals.fat_g,
+      });
+      Alert.alert('Saved', 'Your goals have been updated.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'Failed to save your goals. Please try again.'
+      );
+    }
   };
 
   return (
