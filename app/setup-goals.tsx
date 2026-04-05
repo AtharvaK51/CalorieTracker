@@ -353,28 +353,52 @@ function ResultsStep({
           value={goals.calories}
           unit="kcal"
           color={Colors.calories}
-          onChangeText={(v) => onChangeGoals({ ...goals, calories: parseInt(v) || 0 })}
+          onChangeText={(v) => {
+            const parsed = parseInt(v, 10);
+            if (Number.isNaN(parsed)) {
+              return;
+            }
+            onChangeGoals({ ...goals, calories: parsed });
+          }}
         />
         <GoalRow
           label="Protein"
           value={goals.protein_g}
           unit="g"
           color={Colors.protein}
-          onChangeText={(v) => onChangeGoals({ ...goals, protein_g: parseInt(v) || 0 })}
+          onChangeText={(v) => {
+            const parsed = parseInt(v, 10);
+            if (Number.isNaN(parsed)) {
+              return;
+            }
+            onChangeGoals({ ...goals, protein_g: parsed });
+          }}
         />
         <GoalRow
           label="Carbs"
           value={goals.carbs_g}
           unit="g"
           color={Colors.carbs}
-          onChangeText={(v) => onChangeGoals({ ...goals, carbs_g: parseInt(v) || 0 })}
+          onChangeText={(v) => {
+            const parsed = parseInt(v, 10);
+            if (Number.isNaN(parsed)) {
+              return;
+            }
+            onChangeGoals({ ...goals, carbs_g: parsed });
+          }}
         />
         <GoalRow
           label="Fat"
           value={goals.fat_g}
           unit="g"
           color={Colors.fat}
-          onChangeText={(v) => onChangeGoals({ ...goals, fat_g: parseInt(v) || 0 })}
+          onChangeText={(v) => {
+            const parsed = parseInt(v, 10);
+            if (Number.isNaN(parsed)) {
+              return;
+            }
+            onChangeGoals({ ...goals, fat_g: parsed });
+          }}
         />
       </View>
 
