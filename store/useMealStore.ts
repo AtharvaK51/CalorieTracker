@@ -68,6 +68,9 @@ export const useMealStore = create<MealState>((set, get) => ({
         fat_g: result.total.fat_g,
         fiber_g: result.total.fiber_g,
       });
+      if (result.title) {
+        await dbUpdateMeal(mealId, { description: result.title });
+      }
     }
 
     set({ aiStatus: status, fallbackPrompt });
@@ -88,6 +91,9 @@ export const useMealStore = create<MealState>((set, get) => ({
       fat_g: nutrition.total.fat_g,
       fiber_g: nutrition.total.fiber_g,
     });
+    if (nutrition.title) {
+      await dbUpdateMeal(mealId, { description: nutrition.title });
+    }
 
     const meals = await getMealsForDate(today());
     set({ todayMeals: meals, aiStatus: 'success' });
