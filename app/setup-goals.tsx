@@ -99,6 +99,11 @@ export default function SetupGoalsScreen() {
       const w = parseFloat(weight) || 70;
       const h = parseFloat(height) || 170;
       const a = parseInt(age) || 25;
+      // Sync effective values back to state so save() persists the same numbers
+      // that were actually used for the calculation (not null for empty fields).
+      if (!parseFloat(weight)) setWeight(String(w));
+      if (!parseFloat(height)) setHeight(String(h));
+      if (!parseInt(age)) setAge(String(a));
       const delta = weightGoals.find((wg) => wg.key === weightGoal)?.delta ?? 0;
       const calculated = calculateGoals(w, h, a, gender, activity);
       const adjustedCalories = Math.max(1200, calculated.calories + delta);
