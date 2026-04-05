@@ -91,9 +91,27 @@ export default function SetupGoalsScreen() {
       const a = parseInt(age) || 25;
       const delta = weightGoals.find((wg) => wg.key === weightGoal)?.delta ?? 0;
       const calculated = calculateGoals(w, h, a, gender as any, activity as any);
+      const adjustedCalories = Math.max(1200, calculated.calories + delta);
+      const originalProtein = calculated.protein_g;
+      const originalCarbs = calculated.carbs_g;
+      const originalFat = calculated.fat_g;
+      const macroCalories =
+        originalProtein * 4 + originalCarbs * 4 + originalFat * 9;
+      let adjustedProtein = originalProtein;
+      let adjustedCarbs = originalCarbs;
+      let adjustedFat = originalFat;
+      if (macroCalories > 0) {
+        const scaleFactor = adjustedCalories / macroCalories;
+        adjustedProtein = Math.round(originalProtein * scaleFactor);
+        adjustedCarbs = Math.round(originalCarbs * scaleFactor);
+        adjustedFat = Math.round(originalFat * scaleFactor);
+      }
       const adjusted = {
         ...calculated,
-        calories: Math.max(1200, calculated.calories + delta),
+        calories: adjustedCalories,
+        protein_g: adjustedProtein,
+        carbs_g: adjustedCarbs,
+        fat_g: adjustedFat,
       };
       setGoals(adjusted);
       setStep('results');
