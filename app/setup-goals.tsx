@@ -327,11 +327,18 @@ function ActivityStep({
   );
 }
 
+type Goals = {
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+};
+
 function ResultsStep({
   goals, onChangeGoals, onSave,
 }: {
-  goals: { calories: number; protein_g: number; carbs_g: number; fat_g: number };
-  onChangeGoals: (g: typeof goals) => void;
+  goals: Goals;
+  onChangeGoals: (g: Goals) => void;
   onSave: () => void;
 }) {
   return (
