@@ -14,7 +14,7 @@ import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../constants/colors';
 import { useProfileStore } from '../store/useProfileStore';
-import { calculateGoals } from '../services/goalCalculator';
+import { calculateGoals, GoalResult } from '../services/goalCalculator';
 
 type Step = 'body' | 'weight_goal' | 'activity' | 'results';
 
@@ -39,6 +39,9 @@ const weightGoals = [
 ] as const;
 
 type WeightGoalKey = 'lose' | 'maintain' | 'gain';
+type GenderKey = typeof genders[number]['key'];
+type ActivityKey = typeof activityLevels[number]['key'];
+type Goals = GoalResult;
 
 const STEP_TITLES: Record<Step, string> = {
   body: 'Body Stats',
@@ -61,12 +64,14 @@ export default function SetupGoalsScreen() {
   const [age, setAge] = useState(
     profile?.age ? String(profile.age) : ''
   );
-  const [gender, setGender] = useState<string>(profile?.gender ?? 'male');
-  const [weightGoal, setWeightGoal] = useState<WeightGoalKey>('maintain');
-  const [activity, setActivity] = useState<string>(
-    profile?.activity_level ?? 'moderate'
+  const [gender, setGender] = useState<GenderKey>(
+    (profile?.gender as GenderKey) ?? 'male'
   );
-  const [goals, setGoals] = useState({
+  const [weightGoal, setWeightGoal] = useState<WeightGoalKey>('maintain');
+  const [activity, setActivity] = useState<ActivityKey>(
+    (profile?.activity_level as ActivityKey) ?? 'moderate'
+  );
+  const [goals, setGoals] = useState<Goals>({
     calories: Math.round(profile?.calorie_goal ?? 2000),
     protein_g: Math.round(profile?.protein_goal_g ?? 50),
     carbs_g: Math.round(profile?.carbs_goal_g ?? 250),
@@ -90,7 +95,7 @@ export default function SetupGoalsScreen() {
       const h = parseFloat(height) || 170;
       const a = parseInt(age) || 25;
       const delta = weightGoals.find((wg) => wg.key === weightGoal)?.delta ?? 0;
-      const calculated = calculateGoals(w, h, a, gender as any, activity as any);
+      const calculated = calculateGoals(w, h, a, gender, activity);
       const adjusted = {
         ...calculated,
         calories: Math.max(1200, calculated.calories + delta),
@@ -202,9 +207,9 @@ function BodyStep({
   weight, height, age, gender,
   onWeight, onHeight, onAge, onGender, onNext,
 }: {
-  weight: string; height: string; age: string; gender: string;
+  weight: string; height: string; age: string; gender: GenderKey;
   onWeight: (v: string) => void; onHeight: (v: string) => void;
-  onAge: (v: string) => void; onGender: (v: string) => void;
+  onAge: (v: string) => void; onGender: (v: GenderKey) => void;
   onNext: () => void;
 }) {
   return (
@@ -299,8 +304,8 @@ function WeightGoalStep({
 function ActivityStep({
   selected, onSelect, onNext,
 }: {
-  selected: string;
-  onSelect: (k: string) => void;
+  selected: ActivityKey;
+  onSelect: (k: ActivityKey) => void;
   onNext: () => void;
 }) {
   return (
@@ -330,8 +335,8 @@ function ActivityStep({
 function ResultsStep({
   goals, onChangeGoals, onSave,
 }: {
-  goals: { calories: number; protein_g: number; carbs_g: number; fat_g: number };
-  onChangeGoals: (g: typeof goals) => void;
+  goals: Goals;
+  onChangeGoals: (g: Goals) => void;
   onSave: () => void;
 }) {
   return (
